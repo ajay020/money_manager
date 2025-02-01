@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/utils/bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
+import '../models/category.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
+import '../widgets/category_selectory.dart';
 
 class UpdateExpenseScreen extends StatefulWidget {
   final Expense expense;
-  final int index;
 
   const UpdateExpenseScreen({
     super.key,
     required this.expense,
-    required this.index,
   });
 
   @override
@@ -23,6 +24,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   late TextEditingController _titleController;
   late TextEditingController _amountController;
   late DateTime _selectedDate;
+  late Category _selectedCategory;
 
   @override
   void initState() {
@@ -31,6 +33,10 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
     _amountController =
         TextEditingController(text: widget.expense.amount.toString());
     _selectedDate = widget.expense.date;
+    _selectedCategory = Category(
+      name: widget.expense.categoryName,
+      iconCode: widget.expense.categoryIconCode,
+    );
   }
 
   @override
@@ -58,18 +64,29 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   void _updateExpense(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       final updatedExpense = Expense(
-        id: widget.expense.id,
-        title: _titleController.text.trim(),
-        amount: double.parse(_amountController.text.trim()),
-        date: _selectedDate,
-      );
+          title: _titleController.text.trim(),
+          amount: double.parse(_amountController.text.trim()),
+          date: _selectedDate,
+          categoryName: _selectedCategory.name,
+          categoryIconCode: _selectedCategory.iconCode);
 
       // Call the provider's update method
       Provider.of<ExpenseProvider>(context, listen: false)
-          .updateExpense(widget.index, updatedExpense);
+          .updateExpense(widget.expense.id, updatedExpense);
 
       Navigator.pop(context); // Go back to the detail or home screen
     }
+  }
+
+  void _openCategoryBottomSheet() {
+    showCategoryBottomSheet(
+      context: context,
+      onCategorySelected: (selectedCategory) {
+        setState(() {
+          _selectedCategory = selectedCategory;
+        });
+      },
+    );
   }
 
   @override
@@ -81,7 +98,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
                 controller: _titleController,
@@ -109,6 +126,10 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
                 },
               ),
               const SizedBox(height: 16),
+              CategorySelectory(
+                selectedCategory: _selectedCategory,
+                onCategoryTap: _openCategoryBottomSheet,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

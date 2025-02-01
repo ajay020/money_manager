@@ -4,19 +4,21 @@ import 'package:money_manager/screens/expense_detail_screen.dart';
 
 class ExpenseItem extends StatelessWidget {
   final Expense expense;
-  final int index;
 
-  const ExpenseItem({super.key, required this.expense, required this.index});
+  const ExpenseItem({super.key, required this.expense});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(Icons.home),
+      leading: Icon(
+        expense.categoryIcon,
+        color: Colors.blue,
+      ),
       title: Text(
         expense.title,
         style: TextStyle(fontSize: 16),
       ),
-      // subtitle: Text('\$${expense.amount.toStringAsFixed(2)}'),
+      subtitle: Text(expense.categoryName),
       trailing: Text(
         '\$${expense.amount.toStringAsFixed(2)}',
         style: TextStyle(fontSize: 16),
@@ -26,7 +28,7 @@ class ExpenseItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ExpenseDetailScreen(index: index),
+            builder: (context) => ExpenseDetailScreen(id: expense.id),
           ),
         );
       },

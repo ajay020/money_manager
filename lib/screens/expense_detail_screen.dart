@@ -6,14 +6,14 @@ import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 
 class ExpenseDetailScreen extends StatelessWidget {
-  final int index;
+  final String id;
 
-  const ExpenseDetailScreen({super.key, required this.index});
+  const ExpenseDetailScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
-    final Expense expense = expenseProvider.expenses[index];
+    final Expense? expense = expenseProvider.getExpenseById(id);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,17 +25,22 @@ class ExpenseDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Title: ${expense.title}',
+              'Title: ${expense?.title}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'Amount: \$${expense.amount.toStringAsFixed(2)}',
+              'Amount: \$${expense?.amount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
-              'Date: ${expense.date.toLocal().toString().split(' ')[0]}',
+              'Category: ${expense?.categoryName}',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Date: ${expense?.date.toLocal().toString().split(' ')[0]}',
               style: TextStyle(fontSize: 18),
             ),
             const Spacer(),
@@ -45,7 +50,10 @@ class ExpenseDetailScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Show the confirmation dialog
-                    _showDeleteConfirmationDialog(context, expenseProvider);
+                    if (expense != null) {
+                      _showDeleteConfirmationDialog(
+                          context, expense, expenseProvider);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[400],
@@ -54,8 +62,10 @@ class ExpenseDetailScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to the Update Screen
-                    _navigateToUpdateScreen(context, expense, index);
+                    if (expense != null) {
+                      // Navigate to the Update Screen
+                      _navigateToUpdateScreen(context, expense);
+                    }
                   },
                   child: const Text('Update'),
                 ),
@@ -68,7 +78,10 @@ class ExpenseDetailScreen extends StatelessWidget {
   }
 
   void _showDeleteConfirmationDialog(
-      BuildContext context, ExpenseProvider expenseProvider) {
+    BuildContext context,
+    Expense expense,
+    ExpenseProvider expenseProvider,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -85,7 +98,7 @@ class ExpenseDetailScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               // Delete the expense
-              expenseProvider.deleteExpense(index);
+              expenseProvider.deleteExpense(expense.id);
               Navigator.pop(context); // Close the dialog
               Navigator.pop(context); // Go back to the home screen
             },
@@ -99,13 +112,11 @@ class ExpenseDetailScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToUpdateScreen(
-      BuildContext context, Expense expense, int index) {
+  void _navigateToUpdateScreen(BuildContext context, Expense expense) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            UpdateExpenseScreen(expense: expense, index: index),
+        builder: (context) => UpdateExpenseScreen(expense: expense),
       ),
     );
   }

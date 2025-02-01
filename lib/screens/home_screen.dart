@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:money_manager/utils/date_formatter.dart';
 
 import 'package:provider/provider.dart';
-import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 import '../widgets/expense_item.dart';
 
@@ -17,33 +16,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    // Load expenses when the app starts
-    final expenseProvider =
-        Provider.of<ExpenseProvider>(context, listen: false);
-    expenseProvider.loadExpenses();
   }
 
   @override
   Widget build(BuildContext context) {
-    final expenses = Provider.of<ExpenseProvider>(context).expenses;
-
     // Group expenses by date
-    final groupedExpenses = groupExpensesByDate(expenses);
+    final groupedExpenses =
+        Provider.of<ExpenseProvider>(context).getExpensesGroupedByDate();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expense Tracker'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/add-expense');
-            },
-          ),
-        ],
+        title: const Text('Money Manager'),
       ),
-      body: expenses.isEmpty
+      body: groupedExpenses.isEmpty
           ? const Center(
               child: Text(
                 'No expenses added yet. Tap the + button to add one!',
@@ -52,10 +37,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: groupedExpenses.keys.length,
+              itemCount: groupedExpenses.length,
               itemBuilder: (ctx, index) {
-                final dateKey = groupedExpenses.keys.toList()[index];
-                final dateExpenses = groupedExpenses[dateKey]!;
+                final date = groupedExpenses.keys.elementAt(index);
+                final expenses = groupedExpenses[date]!;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,43 +49,37 @@ class _HomeScreenState extends State<HomeScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
-                        dateKey,
+                        formatDate(date.toString()),
                         style: const TextStyle(
                           fontSize: 18,
                         ),
                       ),
                     ),
+
                     Divider(),
 
                     // Display Expenses for the Date
-                    ...dateExpenses.map((expense) {
-                      return ExpenseItem(
-                          expense: expense, index: expenses.indexOf(expense));
+                    ...expenses.map((expense) {
+                      return ExpenseItem(expense: expense);
                     }),
                   ],
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add-expense');
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
-  Map<String, List<Expense>> groupExpensesByDate(List<Expense> expenses) {
-    Map<String, List<Expense>> groupedExpenses = {};
+  // Map<String, List<Expense>> groupExpensesByDate(List<Expense> expenses) {
+  //   Map<String, List<Expense>> groupedExpenses = {};
 
-    for (var expense in expenses) {
-      String dateKey = DateFormat('MMM d, EEEE').format(expense.date);
-      if (!groupedExpenses.containsKey(dateKey)) {
-        groupedExpenses[dateKey] = [];
-      }
-      groupedExpenses[dateKey]!.add(expense);
-    }
+  //   for (var expense in expenses) {
+  //     String dateKey = DateFormat('MMM d, EEEE').format(expense.date);
+  //     if (!groupedExpenses.containsKey(dateKey)) {
+  //       groupedExpenses[dateKey] = [];
+  //     }
+  //     groupedExpenses[dateKey]!.add(expense);
+  //   }
 
-    return groupedExpenses;
-  }
+  //   return groupedExpenses;
+  // }
 }
