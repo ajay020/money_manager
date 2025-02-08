@@ -20,6 +20,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  TransactionType currentTransactionType = TransactionType.expense;
 
   Category? _selectedCategory;
 
@@ -53,7 +54,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       title: _titleController.text,
       amount: amount,
       date: _selectedDate,
-      type: TransactionType.expense,
+      type: currentTransactionType,
       category: Category(
         name: _selectedCategory!.name,
         iconCode: _selectedCategory!.iconCode,
@@ -121,6 +122,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              SegmentedButton<TransactionType>(
+                segments: [
+                  ButtonSegment(
+                      value: TransactionType.expense, label: Text("Expense")),
+                  ButtonSegment(
+                      value: TransactionType.income, label: Text("Income")),
+                ],
+                selected: {currentTransactionType},
+                onSelectionChanged: (selectedType) {
+                  setState(() {
+                    currentTransactionType = selectedType.first;
+                  });
+                },
+              ),
               TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Title'),
