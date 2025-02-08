@@ -3,7 +3,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:money_manager/providers/category_provider.dart';
 import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/screens/add_expense_screen.dart';
-import 'package:money_manager/screens/records_screen.dart';
+import 'package:money_manager/screens/home_screen.dart';
+import 'package:money_manager/screens/transactions_screen.dart';
 import 'package:money_manager/services/category_service.dart';
 import 'package:money_manager/services/transaction_service.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +52,7 @@ class MoneyManagerApp extends StatelessWidget {
           _transactionService,
           _categoryService,
         ),
+        routes: {"/add-transaction": (context) => AddExpenseScreen()},
       ),
     );
   }
@@ -77,35 +79,46 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     super.initState();
     _screens = [
-      RecordsScreen(), // Screen to display expenses
-      AddExpenseScreen(), // Screen to add an expense
+      HomeScreen(onNavigateToTransactions: _navigateToTransactions),
+      TransactionsScreen(),
       ExpenseGraphScreen(
         transactionService: widget._transactionService,
         categoryService: widget._categoryService,
-      ), // Screen to display expenses in graphical form
+      ),
     ];
+  }
+
+   void _navigateToTransactions() {
+    setState(() {
+      _currentIndex = 1; // Transactions index
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex], // Display the selected screen
+      body: _screens[_currentIndex],
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.pushNamed(context, '/add-transaction');
+          }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: Colors.lightBlue,
         onTap: (index) {
           setState(() {
-            _currentIndex = index; // Update the selected index
+            _currentIndex = index;
           });
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Records',
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Add Transaction',
+            icon: Icon(Icons.list),
+            label: 'Transactions',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),

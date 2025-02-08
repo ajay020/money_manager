@@ -3,7 +3,7 @@ import 'package:money_manager/models/transaction_model.dart';
 
 import '../models/category_model.dart';
 import '../models/transaction_type.dart';
-import '../screens/records_screen.dart';
+import '../screens/home_screen.dart';
 import '../services/transaction_service.dart';
 
 class TransactionProvider extends ChangeNotifier {
@@ -46,6 +46,16 @@ class TransactionProvider extends ChangeNotifier {
     );
   }
 
+  List<Transaction> getLastSevenDaysTransactions() {
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
+    return _transactions
+        .where((transaction) => transaction.date.isAfter(sevenDaysAgo))
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date)); // Sort in descending order
+  }
+
   double getTotalExpenses({DateTime? startDate, DateTime? endDate}) {
     return _transactionService.getTotalExpenses(
         startDate: startDate, endDate: endDate);
@@ -79,6 +89,7 @@ class TransactionProvider extends ChangeNotifier {
   // Filter Transactions
   List<Transaction> getFilteredTransactions(FilterType filterType) {
     _loadTransaction();
+
     if (filterType == FilterType.income) {
       return _transactions.where((tx) => tx.type.isIncome).toList();
     } else if (filterType == FilterType.expense) {
