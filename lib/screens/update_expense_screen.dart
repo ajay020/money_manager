@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/models/transaction_type.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/utils/bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
-import '../models/category.dart';
-import '../models/expense.dart';
-import '../providers/expense_provider.dart';
+import '../models/category_model.dart';
+import '../models/transaction_model.dart';
 import '../widgets/category_selectory.dart';
 
 class UpdateExpenseScreen extends StatefulWidget {
-  final Expense expense;
+  final Transaction transaction;
 
   const UpdateExpenseScreen({
     super.key,
-    required this.expense,
+    required this.transaction,
   });
 
   @override
@@ -29,13 +30,13 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.expense.title);
+    _titleController = TextEditingController(text: widget.transaction.title);
     _amountController =
-        TextEditingController(text: widget.expense.amount.toString());
-    _selectedDate = widget.expense.date;
+        TextEditingController(text: widget.transaction.amount.toString());
+    _selectedDate = widget.transaction.date;
     _selectedCategory = Category(
-      name: widget.expense.categoryName,
-      iconCode: widget.expense.categoryIconCode,
+      name: widget.transaction.category.name,
+      iconCode: widget.transaction.category.iconCode,
     );
   }
 
@@ -61,18 +62,23 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
     }
   }
 
-  void _updateExpense(BuildContext context) {
+  void _updateTransaction(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      final updatedExpense = Expense(
-          title: _titleController.text.trim(),
-          amount: double.parse(_amountController.text.trim()),
-          date: _selectedDate,
-          categoryName: _selectedCategory.name,
-          categoryIconCode: _selectedCategory.iconCode);
+      final updatedTransaction = Transaction(
+        id: widget.transaction.id,
+        title: _titleController.text.trim(),
+        amount: double.parse(_amountController.text.trim()),
+        date: _selectedDate,
+        type: TransactionType.expense,
+        category: Category(
+          name: _selectedCategory.name,
+          iconCode: _selectedCategory.iconCode,
+        ),
+      );
 
       // Call the provider's update method
-      Provider.of<ExpenseProvider>(context, listen: false)
-          .updateExpense(widget.expense.id, updatedExpense);
+      Provider.of<TransactionProvider>(context, listen: false)
+          .updateTransaction(widget.transaction.id, updatedTransaction);
 
       Navigator.pop(context); // Go back to the detail or home screen
     }
@@ -144,7 +150,7 @@ class _UpdateExpenseScreenState extends State<UpdateExpenseScreen> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () => _updateExpense(context),
+                onPressed: () => _updateTransaction(context),
                 child: const Text('Update Expense'),
               ),
             ],

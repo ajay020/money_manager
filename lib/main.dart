@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:money_manager/providers/category_provider.dart';
-import 'package:money_manager/providers/expense_provider.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/screens/add_expense_screen.dart';
-import 'package:money_manager/screens/home_screen.dart';
+import 'package:money_manager/screens/records_screen.dart';
 import 'package:money_manager/services/category_service.dart';
+import 'package:money_manager/services/transaction_service.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/graph_screen.dart';
-import 'services/expense_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
-  final expenseService = ExpenseService();
-  await expenseService.init();
   final categoryService = CategoryService();
   await categoryService.init();
+  final transactionService = TransactionService();
+  await transactionService.init();
 
   runApp(MoneyManagerApp(
-    expenseService,
+    transactionService,
     categoryService,
   ));
 }
 
 class MoneyManagerApp extends StatelessWidget {
-  final ExpenseService _expenseService;
+  final TransactionService _transactionService;
   final CategoryService _categoryService;
 
-  const MoneyManagerApp(this._expenseService, this._categoryService,
+  const MoneyManagerApp(this._transactionService, this._categoryService,
       {super.key});
 
   @override
@@ -37,7 +37,7 @@ class MoneyManagerApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-            create: (context) => ExpenseProvider(_expenseService)),
+            create: (context) => TransactionProvider(_transactionService)),
         ChangeNotifierProvider(
             create: (context) => CategoryProvider(_categoryService)),
       ],
@@ -48,7 +48,7 @@ class MoneyManagerApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         home: BottomNavBar(
-          _expenseService,
+          _transactionService,
           _categoryService,
         ),
       ),
@@ -57,10 +57,11 @@ class MoneyManagerApp extends StatelessWidget {
 }
 
 class BottomNavBar extends StatefulWidget {
-  final ExpenseService _expenseService;
+  final TransactionService _transactionService;
   final CategoryService _categoryService;
 
-  const BottomNavBar(this._expenseService, this._categoryService, {super.key});
+  const BottomNavBar(this._transactionService, this._categoryService,
+      {super.key});
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -76,10 +77,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     super.initState();
     _screens = [
-      HomeScreen(), // Screen to display expenses
+      RecordsScreen(), // Screen to display expenses
       AddExpenseScreen(), // Screen to add an expense
       ExpenseGraphScreen(
-        expenseService: widget._expenseService,
+        transactionService: widget._transactionService,
         categoryService: widget._categoryService,
       ), // Screen to display expenses in graphical form
     ];
@@ -104,7 +105,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
-            label: 'Add Expense',
+            label: 'Add Transaction',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),

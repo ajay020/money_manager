@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:money_manager/services/transaction_service.dart';
 
 import '../services/category_service.dart';
-import '../services/expense_service.dart';
 
 class ExpenseGraphScreen extends StatefulWidget {
-  final ExpenseService expenseService;
+  final TransactionService transactionService;
   final CategoryService categoryService;
 
   const ExpenseGraphScreen({
     super.key,
-    required this.expenseService,
+    required this.transactionService,
     required this.categoryService,
   });
 
@@ -45,16 +45,17 @@ class _ExpenseGraphScreenState extends State<ExpenseGraphScreen> {
       endDate = DateTime(_selectedDate.year, 12, 31);
     }
 
-    final expenses =
-        widget.expenseService.getExpensesByDateRange(startDate, endDate);
+    final transactions =
+        widget.transactionService.getTransactionByDateRange(startDate, endDate);
     _categoryTotals = {};
     _totalExpenses = 0;
 
     // Calculate totals for each category
-    for (var expense in expenses) {
-      _categoryTotals[expense.categoryName] =
-          (_categoryTotals[expense.categoryName] ?? 0) + expense.amount;
-      _totalExpenses += expense.amount;
+    for (var transaction in transactions) {
+      _categoryTotals[transaction.category.name] =
+          (_categoryTotals[transaction.category.name] ?? 0) +
+              transaction.amount;
+      _totalExpenses += transaction.amount;
     }
 
     // Generate pie chart sections

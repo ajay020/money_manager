@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:money_manager/models/transaction_model.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/screens/update_expense_screen.dart';
 import 'package:provider/provider.dart';
 
-import '../models/expense.dart';
-import '../providers/expense_provider.dart';
-
 class ExpenseDetailScreen extends StatelessWidget {
   final String id;
-
   const ExpenseDetailScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
-    final expenseProvider = Provider.of<ExpenseProvider>(context);
-    final Expense? expense = expenseProvider.getExpenseById(id);
+    print("Received ID: $id");
+    
+    final transactionProvider = Provider.of<TransactionProvider>(context);
+    final Transaction? transaction = transactionProvider.getTransactionById(id);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,22 +25,22 @@ class ExpenseDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Title: ${expense?.title}',
+              'Title: ${transaction?.title}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'Amount: \$${expense?.amount.toStringAsFixed(2)}',
+              'Amount: \$${transaction?.amount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
-              'Category: ${expense?.categoryName}',
+              'Category: ${transaction?.category.name}',
               style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
-              'Date: ${expense?.date.toLocal().toString().split(' ')[0]}',
+              'Date: ${transaction?.date.toLocal().toString().split(' ')[0]}',
               style: TextStyle(fontSize: 18),
             ),
             const Spacer(),
@@ -50,9 +50,12 @@ class ExpenseDetailScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Show the confirmation dialog
-                    if (expense != null) {
+                    if (transaction != null) {
                       _showDeleteConfirmationDialog(
-                          context, expense, expenseProvider);
+                        context,
+                        transaction,
+                        transactionProvider,
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -62,9 +65,9 @@ class ExpenseDetailScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (expense != null) {
+                    if (transaction != null) {
                       // Navigate to the Update Screen
-                      _navigateToUpdateScreen(context, expense);
+                      _navigateToUpdateScreen(context, transaction);
                     }
                   },
                   child: const Text('Update'),
@@ -79,15 +82,16 @@ class ExpenseDetailScreen extends StatelessWidget {
 
   void _showDeleteConfirmationDialog(
     BuildContext context,
-    Expense expense,
-    ExpenseProvider expenseProvider,
+    Transaction transaction,
+    TransactionProvider transactionProvider,
   ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Expense'),
         content: const Text(
-            'Are you sure you want to delete this expense? This action cannot be undone.'),
+          'Are you sure you want to delete this expense? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -98,7 +102,7 @@ class ExpenseDetailScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               // Delete the expense
-              expenseProvider.deleteExpense(expense.id);
+              transactionProvider.deleteTransaction(transaction.id);
               Navigator.pop(context); // Close the dialog
               Navigator.pop(context); // Go back to the home screen
             },
@@ -112,11 +116,13 @@ class ExpenseDetailScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToUpdateScreen(BuildContext context, Expense expense) {
+  void _navigateToUpdateScreen(BuildContext context, Transaction transaction) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UpdateExpenseScreen(expense: expense),
+        builder: (context) => UpdateExpenseScreen(
+          transaction: transaction,
+        ),
       ),
     );
   }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:money_manager/models/category.dart';
-import 'package:money_manager/models/expense.dart';
-import 'package:money_manager/providers/expense_provider.dart';
+import 'package:money_manager/models/category_model.dart';
+import 'package:money_manager/models/transaction_model.dart';
+import 'package:money_manager/models/transaction_type.dart';
+import 'package:money_manager/providers/transaction_provider.dart';
 import 'package:money_manager/utils/bottom_sheet.dart';
 import 'package:money_manager/utils/common_utils.dart';
 import 'package:money_manager/widgets/category_selectory.dart';
 import 'package:provider/provider.dart';
-
-import '../providers/category_provider.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -50,18 +49,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return;
     }
 
-    final newExpense = Expense(
+    final newTransaction = Transaction(
       title: _titleController.text,
       amount: amount,
       date: _selectedDate,
-      categoryName: _selectedCategory!.name,
-      categoryIconCode: _selectedCategory!.iconCode,
+      type: TransactionType.expense,
+      category: Category(
+        name: _selectedCategory!.name,
+        iconCode: _selectedCategory!.iconCode,
+      ),
     );
 
-    Provider.of<ExpenseProvider>(context, listen: false).addExpense(newExpense);
+    // Provider.of<ExpenseProvider>(context, listen: false).addExpense(newExpense);
+    Provider.of<TransactionProvider>(context, listen: false)
+        .addTransaction(newTransaction);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Expense Added Successfully!')),
+      const SnackBar(content: Text('Transaction Added Successfully!')),
     );
 
     // Reset all fields

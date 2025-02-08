@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:money_manager/models/category.dart';
+import 'package:money_manager/models/category_model.dart';
 
 import '../services/category_service.dart';
 

@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 
 part 'expense.g.dart'; // Required for code generation
 
-@HiveType(typeId: 0) // Unique ID for this model
+@HiveType(typeId: 4) // Unique ID for this model
 class Expense extends HiveObject {
   @HiveField(0)
   final String title;

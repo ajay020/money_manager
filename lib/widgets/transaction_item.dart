@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:money_manager/models/expense.dart';
+import 'package:money_manager/models/transaction_model.dart';
 import 'package:money_manager/screens/expense_detail_screen.dart';
 
-class ExpenseItem extends StatelessWidget {
-  final Expense expense;
+class TransactionItem extends StatelessWidget {
+  final Transaction transaction;
 
-  const ExpenseItem({super.key, required this.expense});
+  const TransactionItem({super.key, required this.transaction});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(
-        expense.categoryIcon,
+        transaction.category.icon,
         color: Colors.blue,
       ),
       title: Text(
-        expense.title,
+        transaction.title,
         style: TextStyle(fontSize: 16),
       ),
-      subtitle: Text(expense.categoryName),
+      subtitle: Text(transaction.category.name),
       trailing: Text(
-        '\$${expense.amount.toStringAsFixed(2)}',
+        '\$${transaction.amount.toStringAsFixed(2)}',
         style: TextStyle(fontSize: 16),
       ),
       onTap: () {
@@ -28,7 +28,7 @@ class ExpenseItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ExpenseDetailScreen(id: expense.id),
+            builder: (context) => ExpenseDetailScreen(id: transaction.id),
           ),
         );
       },
